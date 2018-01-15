@@ -12,30 +12,37 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 //https://github.com/codepath/android_guides/wiki/Using-an-ArrayAdapter-with-ListView
 
-
+    protected BBDD ddbb;
+    protected SQLiteDatabase db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+    }
+    @Override
+    protected void onResume() {
+        super.onRestart();
+        ddbb = new BBDD(this, "vinos", null);
+        db = ddbb.getWritableDatabase();
 
-        BBDD bbdd = new BBDD(this, "vinos", null);
-        SQLiteDatabase bd = bbdd.getWritableDatabase();
+        Cursor  cursor = db.rawQuery("select * from "+ModelVino.TABLE_VINOS,null);
+        ArrayList<ModelVino> vinosArray = new ArrayList<ModelVino>();
+        if (cursor.moveToFirst()) {
+            while (!cursor.isAfterLast()) {
+                String nm = cursor.getString(cursor.getColumnIndex(ModelVino.VINOS_NOM));
+                String cl = cursor.getString(cursor.getColumnIndex(ModelVino.VINOS_COLLITA));
+                String og = cursor.getString(cursor.getColumnIndex(ModelVino.VINOS_ORIGEN));
+                String tp = cursor.getString(cursor.getColumnIndex(ModelVino.VINOS_TIPO));
+                int id = cursor.getInt(cursor.getColumnIndex(ModelVino.VINOS_ID));
+                vinosArray.add(new ModelVino(id,nm,og,tp,cl));
+                cursor.moveToNext();
+            }
+        }
+        cursor.close();
 
-
-        ArrayList<ModelVino> arrayOfUsers = new ArrayList<ModelVino>();
-// Create the adapter to convert the array to views
-        AdapterVino adapter = new AdapterVino(this, arrayOfUsers);
-// Attach the adapter to a ListView
+        AdapterVino adapter = new AdapterVino(this, vinosArray);
         ListView listView = (ListView) findViewById(R.id.list);
         listView.setAdapter(adapter);
-
-        ModelVino newUser = new ModelVino("Nathan", "San Diego");
-        adapter.add(newUser);
-        ModelVino newUser1 = new ModelVino("vinoy", "San yrthrth");
-        adapter.add(newUser1);
-        ModelVino newUser2 = new ModelVino("Nathan", "Sahrthn rhrth");
-        adapter.add(newUser2);
-
-
     }
+
 }

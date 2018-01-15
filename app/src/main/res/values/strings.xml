@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Sqlite</string>
+    <string name="app_name">Vinos wiht SQLite</string>
+    <string name="title_activity_vino_view">VinoView</string>
 </resources>
