@@ -3,9 +3,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/mybutton"
-        android:title=""
+        android:id="@+id/search"
+        android:title="Search"
         app:showAsAction="always"
-        android:icon="@drawable/add"
+        android:icon="@drawable/search"
         />
 </menu>

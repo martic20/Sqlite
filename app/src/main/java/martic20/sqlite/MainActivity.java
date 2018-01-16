@@ -1,13 +1,19 @@
 package martic20.sqlite;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -16,18 +22,18 @@ public class MainActivity extends AppCompatActivity {
 
     protected BBDD ddbb;
     protected SQLiteDatabase db;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
     }
-    @Override
-    protected void onResume() {
-        super.onRestart();
+
+    protected void loadData(String query) {
         ddbb = new BBDD(this, "vinos", null);
         db = ddbb.getWritableDatabase();
 
-        Cursor  cursor = db.rawQuery("select * from "+ModelVino.TABLE_VINOS,null);
+        Cursor cursor = db.rawQuery(query, null);
         ArrayList<ModelVino> vinosArray = new ArrayList<ModelVino>();
         if (cursor.moveToFirst()) {
             while (!cursor.isAfterLast()) {
@@ -36,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
                 String og = cursor.getString(cursor.getColumnIndex(ModelVino.VINOS_ORIGEN));
                 String tp = cursor.getString(cursor.getColumnIndex(ModelVino.VINOS_TIPO));
                 int id = cursor.getInt(cursor.getColumnIndex(ModelVino.VINOS_ID));
-                vinosArray.add(new ModelVino(id,nm,og,tp,cl));
+                vinosArray.add(new ModelVino(id, nm, og, tp, cl));
                 cursor.moveToNext();
             }
         }
@@ -45,6 +51,12 @@ public class MainActivity extends AppCompatActivity {
         AdapterVino adapter = new AdapterVino(this, vinosArray);
         ListView listView = (ListView) findViewById(R.id.list);
         listView.setAdapter(adapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onRestart();
+        loadData("select * from " + ModelVino.TABLE_VINOS);
     }
 
     @Override
@@ -58,10 +70,44 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.mybutton) {
-            // do something here
+        if (id == R.id.search) {
+            showSearchDialog();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    protected void showSearchDialog() {
+
+        // get prompts.xml view
+        LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
+        View promptView = layoutInflater.inflate(R.layout.dialog_seach, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+        alertDialogBuilder.setView(promptView);
+
+        final EditText input = (EditText) promptView.findViewById(R.id.edittext);
+        // setup a dialog window
+        alertDialogBuilder.setCancelable(false)
+                .setPositiveButton("Buscar", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        String text = input.getText().toString();
+                        loadData("select * from " + ModelVino.TABLE_VINOS +" where " +
+                                ModelVino.VINOS_NOM+" like '%"+text+"%' or "+
+                                ModelVino.VINOS_TIPO+" like '%"+text+"%' or "+
+                                ModelVino.VINOS_COLLITA+" like '%"+text+"%' or "+
+                                ModelVino.VINOS_ORIGEN+" like '%"+text+"%'"
+                        );
+                    }
+                })
+                .setNegativeButton("Canelar",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+        // create an alert dialog
+        AlertDialog alert = alertDialogBuilder.create();
+        alert.show();
     }
 
 }
