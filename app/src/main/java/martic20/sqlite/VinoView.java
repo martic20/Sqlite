@@ -34,51 +34,72 @@ public class VinoView extends AppCompatActivity {
 
         position = (getIntent().getIntExtra("idVino", -1) + 1);
 
+
         nom = (EditText) findViewById(R.id.txNom);
         collita = (EditText) findViewById(R.id.txCollita);
         origen = (EditText) findViewById(R.id.txOrigen);
         tipo = (EditText) findViewById(R.id.txTipo);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //guardar datos update
-                BBDD ddbb = new BBDD(view.getContext(), "vinos", null);
-                SQLiteDatabase db = ddbb.getWritableDatabase();
-                Cursor c = db.rawQuery(ModelVino.updateById(position, nom.getText().toString()
-                        , tipo.getText().toString(), origen.getText().toString(),collita.getText().toString()), null);
-                c.moveToFirst();
-                c.close();
+        if (position == -1) {
+            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    //guardar datos update
+                    BBDD ddbb = new BBDD(view.getContext(), "vinos", null);
+                    SQLiteDatabase db = ddbb.getWritableDatabase();
+                    Cursor c = db.rawQuery(ModelVino.insert( nom.getText().toString()
+                            , tipo.getText().toString(), origen.getText().toString(), collita.getText().toString()), null);
+                    c.moveToFirst();
+                    c.close();
 
-               Intent g = new Intent(view.getContext(),MainActivity.class);
-                //((Activity)view.getContext()).startActivity(g);
-                ((Activity)view.getContext()).finish();
-            }
-        });
-
-        BBDD ddbb = new BBDD(this, "vinos", null);
-        SQLiteDatabase db = ddbb.getWritableDatabase();
-
-        Cursor cursor = db.rawQuery("select * from " + ModelVino.TABLE_VINOS + " where " + ModelVino.VINOS_ID + " = " +position, null);
-
-        if (cursor.moveToFirst()) {
-            if (!cursor.isAfterLast()) {
-                nom = (EditText) findViewById(R.id.txNom);
-                collita = (EditText) findViewById(R.id.txCollita);
-                origen = (EditText) findViewById(R.id.txOrigen);
-                tipo = (EditText) findViewById(R.id.txTipo);
-
-                nom.setText(cursor.getString(cursor.getColumnIndex(ModelVino.VINOS_NOM)));
-                collita.setText(cursor.getString(cursor.getColumnIndex(ModelVino.VINOS_COLLITA)));
-                origen.setText(cursor.getString(cursor.getColumnIndex(ModelVino.VINOS_ORIGEN)));
-                tipo.setText(cursor.getString(cursor.getColumnIndex(ModelVino.VINOS_TIPO)));
-
-            }
+                    //Intent g = new Intent(view.getContext(), MainActivity.class);
+                    //((Activity)view.getContext()).startActivity(g);
+                    ((Activity) view.getContext()).finish();
+                }
+            });
         } else {
-            Toast.makeText(this, "No se ha encontrado ningún vino", Toast.LENGTH_SHORT);
+            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    //guardar datos update
+                    BBDD ddbb = new BBDD(view.getContext(), "vinos", null);
+                    SQLiteDatabase db = ddbb.getWritableDatabase();
+                    Cursor c = db.rawQuery(ModelVino.updateById(position, nom.getText().toString()
+                            , tipo.getText().toString(), origen.getText().toString(), collita.getText().toString()), null);
+                    c.moveToFirst();
+                    c.close();
+
+                    Intent g = new Intent(view.getContext(), MainActivity.class);
+                    //((Activity)view.getContext()).startActivity(g);
+                    ((Activity) view.getContext()).finish();
+                }
+            });
+
+            BBDD ddbb = new BBDD(this, "vinos", null);
+            SQLiteDatabase db = ddbb.getWritableDatabase();
+
+            Cursor cursor = db.rawQuery("select * from " + ModelVino.TABLE_VINOS + " where " + ModelVino.VINOS_ID + " = " + position, null);
+
+            if (cursor.moveToFirst()) {
+                if (!cursor.isAfterLast()) {
+                    nom = (EditText) findViewById(R.id.txNom);
+                    collita = (EditText) findViewById(R.id.txCollita);
+                    origen = (EditText) findViewById(R.id.txOrigen);
+                    tipo = (EditText) findViewById(R.id.txTipo);
+
+                    nom.setText(cursor.getString(cursor.getColumnIndex(ModelVino.VINOS_NOM)));
+                    collita.setText(cursor.getString(cursor.getColumnIndex(ModelVino.VINOS_COLLITA)));
+                    origen.setText(cursor.getString(cursor.getColumnIndex(ModelVino.VINOS_ORIGEN)));
+                    tipo.setText(cursor.getString(cursor.getColumnIndex(ModelVino.VINOS_TIPO)));
+
+                }
+            } else {
+                Toast.makeText(this, "No se ha encontrado ningún vino", Toast.LENGTH_SHORT);
+            }
+            cursor.close();
         }
-        cursor.close();
     }
 
 }

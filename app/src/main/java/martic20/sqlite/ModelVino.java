@@ -36,4 +36,11 @@ public class ModelVino {
                 VINOS_COLLITA + "= '" + collita + "'," + VINOS_TIPO + "= '" + tipo + "' " +
                 "where " + ModelVino.VINOS_ID + " =" + id;
     }
+
+    public static String insert(String nom,String tipo, String origen, String collita) {
+        return "insert into " + TABLE_VINOS + " " +
+                "(" + VINOS_NOM + ","  + VINOS_ORIGEN + ","  +
+                VINOS_COLLITA + "," + VINOS_TIPO + ")" +
+                " values ('" + nom + "','"+ tipo + "','"+ origen + "','"+ collita + "');";
+    }
 }
