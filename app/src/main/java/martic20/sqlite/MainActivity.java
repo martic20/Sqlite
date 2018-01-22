@@ -14,9 +14,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -30,15 +36,23 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Button searchPop = (Button) findViewById(R.id.cleanFilter);
+        searchPop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                findViewById(R.id.searchPopUp).setVisibility(View.GONE);
+                loadData("select * from " + ModelVino.TABLE_VINOS);
+            }
+        });
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
 
-                Intent g = new Intent(view.getContext(),VinoView.class);
-                g.putExtra("idVino",-1);
-                ((Activity)view.getContext()).startActivity(g);
+                Intent g = new Intent(view.getContext(), VinoView.class);
+                g.putExtra("idVino", -1);
+                ((Activity) view.getContext()).startActivity(g);
                 //((Activity)view.getContext()).finish();
             }
         });
@@ -88,11 +102,14 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.search) {
             showSearchDialog();
         }
+        if (id == R.id.filter) {
+            showFilterDialog();
+        }
         return super.onOptionsItemSelected(item);
     }
 
     protected void showSearchDialog() {
-
+        findViewById(R.id.searchPopUp).setVisibility(View.VISIBLE);
         // get prompts.xml view
         LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
         View promptView = layoutInflater.inflate(R.layout.dialog_seach, null);
@@ -105,11 +122,50 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton("Buscar", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         String text = input.getText().toString();
-                        loadData("select * from " + ModelVino.TABLE_VINOS +" where " +
-                                ModelVino.VINOS_NOM+" like '%"+text+"%' or "+
-                                ModelVino.VINOS_TIPO+" like '%"+text+"%' or "+
-                                ModelVino.VINOS_COLLITA+" like '%"+text+"%' or "+
-                                ModelVino.VINOS_ORIGEN+" like '%"+text+"%'"
+                        TextView t = (TextView) findViewById(R.id.searchingBy);
+                        t.setText(text);
+                        loadData("select * from " + ModelVino.TABLE_VINOS + " where " +
+                                ModelVino.VINOS_NOM + " like '%" + text + "%' or " +
+                                ModelVino.VINOS_TIPO + " like '%" + text + "%' or " +
+                                ModelVino.VINOS_COLLITA + " like '%" + text + "%' or " +
+                                ModelVino.VINOS_ORIGEN + " like '%" + text + "%'"
+                        );
+                    }
+                })
+                .setNegativeButton("Canelar",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+        // create an alert dialog
+        AlertDialog alert = alertDialogBuilder.create();
+        alert.show();
+    }
+
+    protected void showFilterDialog() {
+        findViewById(R.id.searchPopUp).setVisibility(View.VISIBLE);
+
+        // get prompts.xml view
+        LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
+        View promptView = layoutInflater.inflate(R.layout.dialog_seach, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+        alertDialogBuilder.setView(promptView);
+
+        final EditText input = (EditText) promptView.findViewById(R.id.edittext);
+        // setup a dialog window
+        alertDialogBuilder.setCancelable(false)
+                .setPositiveButton("Filtrar", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        RadioGroup radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
+                        int selectedId = radioGroup.getCheckedRadioButtonId();
+                        RadioButton radioButton = (RadioButton) findViewById(selectedId);
+                        TextView t = (TextView) findViewById(R.id.searchingBy);
+                        t.setText("Filtrando por: " + radioButton.getText().toString());
+                        loadData("select * from " + ModelVino.TABLE_VINOS + " where " +
+
+                                ModelVino.VINOS_TIPO + " like '%" + radioButton.getText().toString() + "%'"
                         );
                     }
                 })
